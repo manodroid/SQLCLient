@@ -1,16 +1,16 @@
-import javax.swing.plaf.nimbus.State;
 import java.sql.*;
 import java.util.ArrayList;
 
 public class DataBase {
     private final String URL;
-
+    Connection conn = null;
+    String workingTable;
     public DataBase(String fileName){
         this.URL = "jdbc:sqlite:"+fileName;
+        this.workingTable = fileName;
     }
 
     private Connection connect(){
-        Connection conn = null;
         try{ //add hints and option panes
             conn = DriverManager.getConnection(URL);
         } catch (SQLException se){
@@ -31,5 +31,19 @@ public class DataBase {
             System.out.println(se.getMessage());
         }
         return tables;
+    }
+
+    public ResultSet executeQuery(String query){
+        conn = connect();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = conn.createStatement();
+            // insert doesnt work
+            rs = stmt.executeQuery(query);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return rs;
     }
 }
