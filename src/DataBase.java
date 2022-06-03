@@ -1,3 +1,4 @@
+import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -5,9 +6,9 @@ public class DataBase {
     private final String URL;
     Connection conn = null;
     String workingTable;
-    public DataBase(String fileName){
-        this.URL = "jdbc:sqlite:"+fileName;
-        this.workingTable = fileName;
+    public DataBase(File file){
+        this.URL = "jdbc:sqlite:"+file.getAbsolutePath();
+        this.workingTable = file.getName();
     }
 
     private Connection connect(){
