@@ -2,39 +2,39 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.io.File;
 
-public class New extends JFrame {
+public class Interface extends JFrame {
     DataBase db;
+public Interface() {
 
-    public New() {
         //main frame
         setTitle("SQLite Client");
         setSize(1000, 700);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        //setLayout(null); //add a gridbag layout or smth
+        setLayout(null);
 
         // upper container => buttons / tables / queryArea
         JPanel upperC = new JPanel(); //upper container
+        JTextArea queryTA = new JTextArea("Write your queries here");
+        upperC.add(queryTA);
         JComboBox<String> tables = new JComboBox<>();
+
         JButton exe = new JButton("Execute");
         JButton open = new JButton("Open");
-        JTextArea queryTA = new JTextArea("Write your queries here");
 
         upperC.add(tables);
         upperC.add(open);
         upperC.add(exe);
-        upperC.add(queryTA); //add a scrollpane here
         tables.setVisible(false);
         // lower container => SQL table
         JTable sqlTable = new JTable();
         JScrollPane scrollC = new JScrollPane(sqlTable);
-
-
-        JSplitPane content = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upperC, sqlTable);
+        JSplitPane content = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upperC, scrollC);
         setContentPane(content);
 
-        // action listeners
-        open.addActionListener(e -> {
+
+        // Action Listeners
+        open.addActionListener(e ->{
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Select database to open");
             fileChooser.setFileFilter(new FileFilter() {
@@ -42,8 +42,7 @@ public class New extends JFrame {
                 public boolean accept(File f) {
                     return f.getName().endsWith(".db");
                 }
-
-                @Override
+                 @Override
                 public String getDescription() {
                     return null;
                 }
@@ -51,19 +50,17 @@ public class New extends JFrame {
             fileChooser.showOpenDialog(null);
             tables.setVisible(true);
             db = new DataBase(fileChooser.getSelectedFile());
-            tables.removeAllItems();
-            db.getTableNames().forEach(tables::addItem);
+            db.getTables().forEach(tables::addItem);
             queryTA.removeAll();
-
-            //initialize table with select * from table by default
         });
 
-        exe.addActionListener(e -> {
-            db.executeQuery(queryTA.getText().trim());
-            // implement a proper execute query method
-            // populate and update the table
+        tables.addItemListener(e -> {
+            String selectedTable = e.getItem().toString();
+            queryTA.setText(String.format(db.BASIC_QUERY, selectedTable));
+            sqlTable.setModel( db.executeQuery("SELECT * FROM "+selectedTable+";"));
         });
+
 
         setVisible(true);
-    }
+   
 }
