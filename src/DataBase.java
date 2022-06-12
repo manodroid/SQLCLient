@@ -1,9 +1,17 @@
+import org.sqlite.SQLiteDataSource;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
-populateublic class DataBase implements AutoCloseable {
+import java.util.Vector;
+
+public class DataBase implements AutoCloseable {
     private Connection con = null;
     private JFrame parentFrame;
+    // reference the main paren and add it to the joption pane
 
     protected final String BASIC_QUERY = "SELECT * FROM %s;";
     private final String URL;
@@ -39,7 +47,7 @@ populateublic class DataBase implements AutoCloseable {
         }
     }
 
-    public DefaultTableModel executeQuery(String query){
+    public TableModel executeQuery(String query){
         try{
             // connection and statement
             Statement st = con.createStatement();
@@ -52,7 +60,7 @@ populateublic class DataBase implements AutoCloseable {
             for (int column = 1; column <= columnCount; column++) {
                 columnNames.add(meta.getColumnName(column));
             }
-            
+
             // data of the table
             Vector<Vector<Object>> data = new Vector<>();
             while (rs.next()) {
@@ -62,7 +70,12 @@ populateublic class DataBase implements AutoCloseable {
                 }
                 data.add(vector);
             }
-            return new DefaultTableModel(data, columnNames);
+            return new DefaultTableModel(data, columnNames){
+                @Override
+                public boolean isCellEditable(int row, int column){
+                    return false;
+                }
+            }; 
 
         } catch (SQLException ex){
             JOptionPane.showMessageDialog(parentFrame, ex.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
