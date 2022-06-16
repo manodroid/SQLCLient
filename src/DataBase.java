@@ -10,15 +10,19 @@ import java.util.Vector;
 
 public class DataBase implements AutoCloseable {
     private Connection con = null;
-    private JFrame parentFrame;
-    // reference the main paren and add it to the joption pane
+    private final JComponent parent;
+
+    private final String dbName;
+    private ResultSet rs;
 
     protected final String BASIC_QUERY = "SELECT * FROM %s;";
     private final String URL;
 
 
-    public DataBase(File file){
+    public DataBase(File file, JSplitPane parentComponent){
        this.URL = "jdbc:sqlite:"+file.getAbsolutePath();
+       this.dbName = file.getName();
+       this.parent = parentComponent;
        connect();
     }
 
@@ -37,12 +41,12 @@ public class DataBase implements AutoCloseable {
         String query = "SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';";
         try {
             Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery(query);
+            rs = st.executeQuery(query);
             ArrayList<String> tables = new ArrayList<>();
             while (rs.next()) tables.add(rs.getString(1));
             return tables;
         } catch (SQLException ex){
-            JOptionPane.showMessageDialog(parentFrame, ex.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(parent, ex.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
             return null;
         }
     }
@@ -51,7 +55,7 @@ public class DataBase implements AutoCloseable {
         try{
             // connection and statement
             Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery(query);
+            rs = st.executeQuery(query);
             ResultSetMetaData meta = rs.getMetaData();
 
             // names of columns
@@ -78,14 +82,23 @@ public class DataBase implements AutoCloseable {
             }; 
 
         } catch (SQLException ex){
-            JOptionPane.showMessageDialog(parentFrame, ex.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(parent, ex.getMessage(), "SQL Error", JOptionPane.ERROR_MESSAGE);
             return null;
         }
 
     }
 
     @Override
+    public String toString() {
+        return dbName;
+    }
+
+    @Override
     public void close() throws Exception {
         con.close();
+    }
+
+    public ResultSet getResultSet(){
+        return rs;
     }
 }
