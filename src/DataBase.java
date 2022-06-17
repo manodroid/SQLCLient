@@ -55,7 +55,16 @@ public class DataBase implements AutoCloseable {
         try{
             // connection and statement
             Statement st = con.createStatement();
-            rs = st.executeQuery(query);
+            if (query.toLowerCase().contains("select")){
+                rs = st.executeQuery(query);
+            } else {
+                int success = st.executeUpdate(query);
+                if (success == 0){
+                    JOptionPane.showMessageDialog(parent, "Update Error", "SQL Error", JOptionPane.ERROR_MESSAGE);
+                    return null;
+                }
+            }
+
             ResultSetMetaData meta = rs.getMetaData();
 
             // names of columns
@@ -98,7 +107,4 @@ public class DataBase implements AutoCloseable {
         con.close();
     }
 
-    public ResultSet getResultSet(){
-        return rs;
-    }
 }
